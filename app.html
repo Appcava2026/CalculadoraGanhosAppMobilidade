@@ -1,0 +1,880 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Calculadora Ganhos App Mobilidade</title>
+<meta name="theme-color" content="#14171B">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#14171B;
+    --panel:#1C2027;
+    --panel-2:#21262E;
+    --panel-3:#262C35;
+    --line:#2C323C;
+    --line-soft:#232830;
+    --amber:#FFB020;
+    --amber-dim:#C98A1B;
+    --amber-glow:rgba(255,176,32,.14);
+    --teal:#2DD9B9;
+    --red:#FF6B5A;
+    --text:#F2F1EC;
+    --muted:#8B93A2;
+    --muted-2:#6C7484;
+
+    --r-sm:10px;
+    --r-md:14px;
+    --r-lg:18px;
+
+    --gap:10px;
+    --pad-card:16px;
+  }
+
+  *{box-sizing:border-box;}
+  html{-webkit-text-size-adjust:100%;}
+
+  body{
+    margin:0;
+    background:
+      radial-gradient(1200px 600px at 85% -12%, rgba(255,176,32,.07), transparent 60%),
+      radial-gradient(900px 520px at -12% 112%, rgba(45,217,185,.06), transparent 60%),
+      var(--bg);
+    background-attachment:fixed;
+    color:var(--text);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    min-height:100vh;
+    min-height:100dvh;
+    padding:
+      calc(18px + env(safe-area-inset-top)) 
+      calc(16px + env(safe-area-inset-right)) 
+      calc(50px + env(safe-area-inset-bottom)) 
+      calc(16px + env(safe-area-inset-left));
+    font-size:16px;
+    line-height:1.5;
+  }
+
+  .wrap{max-width:860px;margin:0 auto;}
+
+  /* ---------- HEADER ---------- */
+  .topbar{
+    display:flex;align-items:center;justify-content:space-between;
+    gap:12px;margin-bottom:18px;flex-wrap:wrap;
+  }
+  .brand{display:flex;align-items:center;gap:10px;min-width:0;}
+  .brand-mark{
+    width:38px;height:38px;border-radius:11px;flex-shrink:0;overflow:hidden;
+    background:linear-gradient(145deg,#5C0A0A,#26020A);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Space Grotesk',sans-serif;font-weight:700;color:#F7D785;font-size:15px;
+    border:1px solid rgba(244,208,111,.35);
+  }
+  .brand-mark img{width:100%;height:100%;object-fit:cover;display:block;}
+  .brand-txt{min-width:0;}
+  .brand-txt h1{
+    font-family:'Space Grotesk',sans-serif;
+    font-size:clamp(14px,3.4vw,16px);
+    margin:0;line-height:1.25;letter-spacing:-.1px;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .brand-txt a{color:var(--muted);text-decoration:none;font-size:12px;}
+  .brand-txt a:hover{color:var(--text);}
+
+  .sync{
+    display:inline-flex;align-items:center;gap:7px;
+    font-size:12px;color:var(--muted);
+    background:var(--panel);border:1px solid var(--line);
+    padding:6px 11px;border-radius:99px;flex-shrink:0;
+  }
+  .dot{width:7px;height:7px;border-radius:50%;background:var(--teal);flex-shrink:0;}
+  .dot.busy{background:var(--amber);animation:pulse 1.1s ease-in-out infinite;}
+  .dot.err{background:var(--red);}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}
+  @media (prefers-reduced-motion:reduce){.dot.busy{animation:none;}}
+
+  /* ---------- LOGIN ---------- */
+  .login{
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border:1px solid var(--line);border-radius:var(--r-lg);
+    padding:clamp(34px,7vw,56px) clamp(20px,5vw,40px);
+    text-align:center;
+  }
+  .login h2{font-family:'Space Grotesk',sans-serif;font-size:clamp(19px,4.4vw,23px);margin:0 0 10px;}
+  .login p{color:var(--muted);font-size:14px;max-width:44ch;margin:0 auto 26px;}
+  #gsiBtn{display:flex;justify-content:center;margin-bottom:16px;min-height:44px;}
+  .login .fine{font-size:12px;color:var(--muted-2);max-width:40ch;margin:0 auto;}
+
+  /* ---------- USER BAR ---------- */
+  .userbar{
+    display:flex;align-items:center;gap:11px;
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--r-md);padding:10px 13px;margin-bottom:16px;
+  }
+  .userbar img{width:30px;height:30px;border-radius:50%;flex-shrink:0;}
+  .userbar .who{flex:1;min-width:0;}
+  .userbar .who b{display:block;font-size:13.5px;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .userbar .who span{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:block;}
+  .btn-ghost{
+    background:transparent;border:1px solid var(--line);color:var(--muted);
+    border-radius:var(--r-sm);padding:8px 13px;font-size:12.5px;cursor:pointer;
+    font-family:inherit;flex-shrink:0;min-height:38px;
+  }
+  .btn-ghost:hover{color:var(--text);border-color:var(--amber-dim);}
+
+  /* ---------- HERO / META ---------- */
+  .meta-card{
+    background:linear-gradient(180deg,var(--panel-2),var(--panel));
+    border:1px solid var(--line);border-radius:var(--r-lg);
+    padding:clamp(20px,4.5vw,26px) clamp(18px,4vw,24px);
+    margin-bottom:var(--gap);position:relative;overflow:hidden;
+  }
+  .meta-card::before{
+    content:"";position:absolute;inset:0 0 auto 0;height:2px;
+    background:linear-gradient(90deg,transparent,var(--amber),transparent);
+  }
+  .meta-head{
+    display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+    font-size:12.5px;color:var(--muted);margin-bottom:9px;flex-wrap:wrap;
+  }
+  .meta-val{display:flex;align-items:baseline;gap:8px;}
+  .meta-cur{font-family:'Space Grotesk',sans-serif;font-size:clamp(20px,4.5vw,25px);font-weight:600;color:var(--amber-dim);}
+  .meta-num{
+    font-family:'Space Grotesk',sans-serif;font-weight:700;
+    font-size:clamp(44px,12vw,64px);line-height:1;letter-spacing:-1.5px;
+    background:linear-gradient(180deg,#FFF6E4,var(--amber));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    font-variant-numeric:tabular-nums;
+  }
+  .meta-sub{font-size:13px;color:var(--muted);margin-top:8px;}
+
+  .prog{margin-top:16px;}
+  .prog-top{display:flex;justify-content:space-between;gap:10px;font-size:12.5px;color:var(--muted);margin-bottom:6px;}
+  .prog-top b{color:var(--text);font-family:'Space Grotesk',sans-serif;font-variant-numeric:tabular-nums;}
+  .prog-bar{height:9px;border-radius:99px;background:var(--panel-3);overflow:hidden;border:1px solid var(--line-soft);}
+  .prog-fill{height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--amber-dim),var(--teal));transition:width .45s cubic-bezier(.4,0,.2,1);}
+  @media (prefers-reduced-motion:reduce){.prog-fill{transition:none;}}
+
+  /* ---------- STAT GRID ---------- */
+  .stats{display:grid;grid-template-columns:repeat(2,1fr);gap:var(--gap);margin-bottom:var(--gap);}
+  @media (min-width:640px){.stats{grid-template-columns:repeat(4,1fr);}}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:13px 15px;}
+  .stat dt{font-size:11.5px;color:var(--muted);margin:0 0 5px;line-height:1.35;}
+  .stat dd{
+    margin:0;font-family:'Space Grotesk',sans-serif;font-weight:600;
+    font-size:clamp(15px,3.6vw,18px);font-variant-numeric:tabular-nums;
+  }
+  .stat dd.neg{color:var(--red);}
+  .stat dd.pos{color:var(--teal);}
+
+  /* ---------- SECTIONS ---------- */
+  .sec-head{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+    margin:28px 0 11px;padding:0 3px;flex-wrap:wrap;
+  }
+  .sec-head h2{
+    font-family:'Space Grotesk',sans-serif;font-size:14.5px;font-weight:600;
+    margin:0;color:var(--text);letter-spacing:-.1px;
+  }
+  .sec-head .link{
+    font-size:12.5px;color:var(--amber);background:none;border:none;
+    cursor:pointer;font-family:inherit;padding:4px;
+  }
+  .sec-head .link:hover{text-decoration:underline;}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:var(--pad-card);margin-bottom:var(--gap);}
+
+  .field-top{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin-bottom:10px;}
+  .field-name{font-size:13.5px;font-weight:500;}
+  .field-unit{font-size:12px;color:var(--muted);flex-shrink:0;}
+
+  /* ---------- STEPPER ---------- */
+  .stepper{display:flex;align-items:center;gap:10px;}
+  .stepper button{
+    width:44px;height:44px;flex-shrink:0;
+    border-radius:var(--r-sm);border:1px solid var(--line);
+    background:var(--panel-2);color:var(--text);font-size:20px;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;font-family:inherit;
+    line-height:1;transition:background .12s,transform .08s;
+  }
+  .stepper button:hover{background:var(--panel-3);}
+  .stepper button:active{transform:scale(.93);}
+  .stepper input{
+    flex:1;min-width:0;background:transparent;border:none;color:var(--text);
+    font-family:'Space Grotesk',sans-serif;font-size:clamp(18px,4.4vw,21px);
+    font-weight:600;text-align:center;outline:none;
+    font-variant-numeric:tabular-nums;-moz-appearance:textfield;padding:8px 4px;
+  }
+  .stepper input::-webkit-outer-spin-button,
+  .stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+
+  /* ---------- PLAIN INPUT ---------- */
+  .inp{
+    width:100%;background:var(--panel-2);border:1px solid var(--line);
+    border-radius:var(--r-sm);padding:12px 13px;color:var(--text);
+    font-family:'Space Grotesk',sans-serif;font-size:16px;font-weight:600;
+    outline:none;font-variant-numeric:tabular-nums;min-height:46px;
+  }
+  .inp::placeholder{color:var(--muted-2);font-weight:500;}
+  .inp:focus{border-color:var(--amber-dim);background:var(--panel-3);}
+  .inp:disabled{opacity:.4;cursor:not-allowed;}
+
+  .grid2{display:grid;grid-template-columns:1fr;gap:var(--gap);}
+  @media (min-width:520px){.grid2{grid-template-columns:1fr 1fr;}}
+  .lbl{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;}
+
+  /* ---------- VEHICLE SELECT (radio cards) ---------- */
+  .veh-group{border:none;padding:0;margin:0 0 var(--gap);}
+  .veh-legend{
+    font-family:'Space Grotesk',sans-serif;font-size:14.5px;font-weight:600;
+    padding:0;margin:0 0 4px;
+  }
+  .veh-hint{font-size:12.5px;color:var(--muted);margin:0 0 12px;}
+
+  .veh-opts{display:grid;grid-template-columns:1fr;gap:var(--gap);}
+  @media (min-width:560px){.veh-opts{grid-template-columns:repeat(3,1fr);}}
+
+  .veh-opt{position:relative;display:block;cursor:pointer;}
+  .veh-opt input{
+    position:absolute;opacity:0;width:0;height:0;pointer-events:none;
+  }
+  .veh-box{
+    display:flex;align-items:center;gap:12px;
+    background:var(--panel);border:1.5px solid var(--line);
+    border-radius:var(--r-md);padding:15px 14px;height:100%;
+    transition:border-color .15s, background .15s, box-shadow .15s;
+  }
+  @media (min-width:560px){
+    .veh-box{flex-direction:column;align-items:flex-start;gap:9px;padding:17px 15px;}
+  }
+  .veh-opt:hover .veh-box{border-color:var(--muted-2);background:var(--panel-2);}
+
+  .veh-icon{
+    width:40px;height:40px;flex-shrink:0;border-radius:var(--r-sm);
+    background:var(--panel-3);border:1px solid var(--line);
+    display:flex;align-items:center;justify-content:center;
+    font-size:19px;transition:background .15s,border-color .15s;
+  }
+  .veh-txt{min-width:0;flex:1;}
+  .veh-name{
+    font-family:'Space Grotesk',sans-serif;font-size:14.5px;font-weight:600;
+    display:block;margin-bottom:2px;
+  }
+  .veh-desc{font-size:12px;color:var(--muted);line-height:1.4;display:block;}
+
+  .veh-check{
+    position:absolute;top:11px;right:11px;
+    width:21px;height:21px;border-radius:50%;
+    border:1.5px solid var(--line);background:var(--panel-2);
+    display:flex;align-items:center;justify-content:center;
+    transition:background .15s,border-color .15s,transform .15s;
+  }
+  .veh-check svg{width:12px;height:12px;opacity:0;transform:scale(.5);transition:opacity .15s,transform .15s;}
+
+  /* selected state */
+  .veh-opt input:checked ~ .veh-box{
+    border-color:var(--amber);
+    background:linear-gradient(180deg,rgba(255,176,32,.09),rgba(255,176,32,.03));
+    box-shadow:0 0 0 3px var(--amber-glow);
+  }
+  .veh-opt input:checked ~ .veh-box .veh-icon{
+    background:rgba(255,176,32,.16);border-color:var(--amber-dim);
+  }
+  .veh-opt input:checked ~ .veh-box .veh-name{color:var(--amber);}
+  .veh-opt input:checked ~ .veh-box .veh-check{
+    background:var(--amber);border-color:var(--amber);
+  }
+  .veh-opt input:checked ~ .veh-box .veh-check svg{opacity:1;transform:scale(1);}
+
+  /* keyboard focus */
+  .veh-opt input:focus-visible ~ .veh-box{
+    outline:2px solid var(--amber);outline-offset:3px;
+  }
+  @media (prefers-reduced-motion:reduce){
+    .veh-box,.veh-icon,.veh-check,.veh-check svg{transition:none;}
+  }
+
+  /* cost field that appears for aluguel / financiamento */
+  .veh-cost{margin-top:var(--gap);}
+  .veh-cost.is-hidden{display:none;}
+
+  .veh-note{
+    display:flex;gap:9px;align-items:flex-start;
+    background:rgba(45,217,185,.06);border:1px solid rgba(45,217,185,.22);
+    border-radius:var(--r-sm);padding:11px 13px;margin-top:var(--gap);
+    font-size:12.5px;color:var(--muted);line-height:1.5;
+  }
+  .veh-note.is-hidden{display:none;}
+  .veh-note b{color:var(--teal);font-weight:600;}
+
+  /* ---------- BUTTONS ---------- */
+  .btn{
+    width:100%;padding:14px;border-radius:var(--r-sm);border:none;
+    background:linear-gradient(145deg,var(--amber),var(--amber-dim));
+    color:#171A1F;font-family:'Space Grotesk',sans-serif;font-weight:700;
+    font-size:14.5px;cursor:pointer;min-height:48px;transition:opacity .12s,transform .08s;
+  }
+  .btn:hover{opacity:.93;}
+  .btn:active{transform:scale(.99);}
+  .btn:disabled{opacity:.45;cursor:not-allowed;}
+  .btn-wide-secondary{
+    width:100%;padding:13px;border-radius:var(--r-sm);
+    border:1px solid var(--line);background:transparent;color:var(--muted);
+    font-size:13.5px;cursor:pointer;font-family:inherit;margin-top:6px;min-height:46px;
+  }
+  .btn-wide-secondary:hover{color:var(--text);border-color:var(--muted-2);}
+
+  /* ---------- HISTORY ---------- */
+  .hist{display:flex;flex-direction:column;gap:7px;}
+  .hist-row{
+    display:flex;justify-content:space-between;align-items:center;gap:12px;
+    background:var(--panel);border:1px solid var(--line);
+    border-radius:var(--r-sm);padding:12px 14px;
+  }
+  .hist-date{font-size:12.5px;color:var(--muted);}
+  .hist-val{font-family:'Space Grotesk',sans-serif;font-weight:600;font-size:14.5px;font-variant-numeric:tabular-nums;}
+  .hist-val.up{color:var(--teal);}
+  .hist-val.down{color:var(--red);}
+  .empty{
+    font-size:13px;color:var(--muted);text-align:center;padding:22px 16px;
+    background:var(--panel);border:1px dashed var(--line);border-radius:var(--r-md);
+  }
+
+  footer{text-align:center;margin-top:28px;font-size:12px;color:var(--muted-2);line-height:1.6;}
+  footer a{color:var(--muted);}
+
+  .hidden{display:none !important;}
+
+  :focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark"><img src="logo-calculadora-motorista.png" alt=""></div>
+      <div class="brand-txt">
+        <h1>Calculadora Ganhos App Mobilidade</h1>
+        <a href="index.html">Voltar ao início</a>
+      </div>
+    </div>
+    <div class="sync"><span class="dot" id="syncDot"></span><span id="syncText">Fora da conta</span></div>
+  </div>
+
+  <!-- ============ LOGIN ============ -->
+  <section class="login" id="loginScreen">
+    <h2>Entre com sua conta Google</h2>
+    <p>Seu veículo, seus custos e seu faturamento ficam salvos numa planilha criada no seu próprio Google Drive. Só você tem acesso a ela.</p>
+    <div id="gsiBtn"></div>
+    <p class="fine">Ao entrar, o app cria (ou reabre) a planilha “Calculadora Ganhos App Mobilidade — Meus Dados” no seu Drive.</p>
+  </section>
+
+  <!-- ============ APP ============ -->
+  <div id="appScreen" class="hidden">
+
+    <div class="userbar">
+      <img id="userPhoto" src="" alt="">
+      <div class="who"><b id="userName">—</b><span id="userEmail"></span></div>
+      <button class="btn-ghost" id="btnLogout" type="button">Sair</button>
+    </div>
+
+    <!-- cadastro do veículo (primeiro acesso) -->
+    <section class="card hidden" id="setupCard">
+      <div class="sec-head" style="margin-top:0">
+        <h2>Cadastre seu veículo</h2>
+      </div>
+      <div class="grid2">
+        <div>
+          <label class="lbl" for="setupModelo">Modelo</label>
+          <input class="inp" id="setupModelo" placeholder="Onix 2020">
+        </div>
+        <div>
+          <label class="lbl" for="setupPlaca">Placa</label>
+          <input class="inp" id="setupPlaca" placeholder="ABC1D23">
+        </div>
+      </div>
+      <div style="height:12px"></div>
+      <button class="btn" id="btnSalvarCadastro" type="button">Salvar veículo</button>
+    </section>
+
+    <div id="mainContent" class="hidden">
+
+      <!-- META -->
+      <section class="meta-card">
+        <div class="meta-head">
+          <span>Meta de faturamento por dia</span>
+          <span id="diasLabel">30 dias no mês</span>
+        </div>
+        <div class="meta-val">
+          <span class="meta-cur">R$</span>
+          <span class="meta-num" id="metaDiaria">0</span>
+        </div>
+        <p class="meta-sub" id="metaSub">Ajuste seus dados abaixo para ver a meta.</p>
+
+        <div class="prog">
+          <div class="prog-top">
+            <span>Faturado este mês: <b id="faturadoMes">R$ 0,00</b></span>
+            <span id="progPct">0%</span>
+          </div>
+          <div class="prog-bar"><div class="prog-fill" id="progFill"></div></div>
+        </div>
+      </section>
+
+      <dl class="stats">
+        <div class="stat"><dt>Combustível no mês</dt><dd class="neg" id="stCombustivel">R$ 0,00</dd></div>
+        <div class="stat"><dt>Outros gastos no mês</dt><dd class="neg" id="stOutros">R$ 0,00</dd></div>
+        <div class="stat"><dt>Faturamento necessário</dt><dd id="stNecessario">R$ 0,00</dd></div>
+        <div class="stat"><dt>Sobra prevista</dt><dd class="pos" id="stSobra">R$ 0,00</dd></div>
+      </dl>
+
+      <!-- REGISTRO -->
+      <div class="sec-head"><h2>Registrar faturamento</h2></div>
+      <section class="card">
+        <div class="grid2">
+          <div>
+            <label class="lbl" for="regData">Data</label>
+            <input class="inp" type="date" id="regData">
+          </div>
+          <div>
+            <label class="lbl" for="regValor">Quanto você faturou (R$)</label>
+            <input class="inp" type="number" id="regValor" inputmode="decimal" placeholder="185,00">
+          </div>
+        </div>
+        <div style="height:12px"></div>
+        <button class="btn" id="btnRegistrar" type="button">Salvar registro</button>
+      </section>
+
+      <div class="sec-head">
+        <h2>Últimos registros</h2>
+        <button class="link" id="btnVerPlanilha" type="button">Abrir planilha</button>
+      </div>
+      <div class="hist" id="histList">
+        <div class="empty">Nenhum registro ainda. Salve o faturamento de hoje para acompanhar sua meta.</div>
+      </div>
+
+      <!-- VEÍCULO -->
+      <div class="sec-head"><h2>Situação do veículo</h2></div>
+      <section class="card">
+        <fieldset class="veh-group">
+          <legend class="veh-legend">Como você usa o carro?</legend>
+          <p class="veh-hint">Escolha uma opção. O custo mensal entra direto no cálculo da sua meta.</p>
+
+          <div class="veh-opts">
+            <label class="veh-opt">
+              <input type="radio" name="tipoVeiculo" value="proprio" id="vehProprio">
+              <span class="veh-box">
+                <span class="veh-check" aria-hidden="true">
+                  <svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2l2.3 2.3 4.7-5" stroke="#171A1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                <span class="veh-icon" aria-hidden="true">🔑</span>
+                <span class="veh-txt">
+                  <span class="veh-name">Próprio</span>
+                  <span class="veh-desc">Já é seu, sem parcela nem aluguel</span>
+                </span>
+              </span>
+            </label>
+
+            <label class="veh-opt">
+              <input type="radio" name="tipoVeiculo" value="alugado" id="vehAlugado">
+              <span class="veh-box">
+                <span class="veh-check" aria-hidden="true">
+                  <svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2l2.3 2.3 4.7-5" stroke="#171A1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                <span class="veh-icon" aria-hidden="true">📋</span>
+                <span class="veh-txt">
+                  <span class="veh-name">Alugado</span>
+                  <span class="veh-desc">Você paga locação para rodar</span>
+                </span>
+              </span>
+            </label>
+
+            <label class="veh-opt">
+              <input type="radio" name="tipoVeiculo" value="financiado" id="vehFinanciado">
+              <span class="veh-box">
+                <span class="veh-check" aria-hidden="true">
+                  <svg viewBox="0 0 12 12" fill="none"><path d="M2.5 6.2l2.3 2.3 4.7-5" stroke="#171A1F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                </span>
+                <span class="veh-icon" aria-hidden="true">🏦</span>
+                <span class="veh-txt">
+                  <span class="veh-name">Financiado</span>
+                  <span class="veh-desc">Você paga parcela todo mês</span>
+                </span>
+              </span>
+            </label>
+          </div>
+
+          <div class="veh-cost is-hidden" id="vehCost">
+            <label class="lbl" for="vehValor" id="vehValorLabel">Valor do aluguel por mês (R$)</label>
+            <input class="inp" type="number" id="vehValor" inputmode="decimal" placeholder="0,00" value="0">
+          </div>
+
+          <div class="veh-note is-hidden" id="vehNote">
+            <span aria-hidden="true">✓</span>
+            <span><b>Veículo próprio selecionado.</b> Nenhum custo de aluguel ou parcela entra na conta — só combustível, lava-jato e gastos gerais.</span>
+          </div>
+        </fieldset>
+      </section>
+
+      <!-- RODAGEM -->
+      <div class="sec-head"><h2>Quanto você roda</h2></div>
+      <section class="card">
+        <div class="field-top"><span class="field-name">Quilômetros por dia</span><span class="field-unit">km</span></div>
+        <div class="stepper">
+          <button type="button" data-t="km" data-s="-10" aria-label="Diminuir quilômetros">−</button>
+          <input type="number" id="kmInput" value="200" inputmode="numeric" aria-label="Quilômetros por dia">
+          <button type="button" data-t="km" data-s="10" aria-label="Aumentar quilômetros">+</button>
+        </div>
+      </section>
+      <section class="card">
+        <div class="field-top"><span class="field-name">Dias trabalhados no mês</span><span class="field-unit">dias</span></div>
+        <div class="stepper">
+          <button type="button" data-t="dias" data-s="-1" aria-label="Diminuir dias">−</button>
+          <input type="number" id="diasInput" value="30" inputmode="numeric" aria-label="Dias trabalhados no mês">
+          <button type="button" data-t="dias" data-s="1" aria-label="Aumentar dias">+</button>
+        </div>
+      </section>
+
+      <!-- COMBUSTÍVEL -->
+      <div class="sec-head"><h2>Combustível</h2></div>
+      <section class="card">
+        <div class="field-top"><span class="field-name">Consumo do carro</span><span class="field-unit">km por litro</span></div>
+        <div class="stepper">
+          <button type="button" data-t="consumo" data-s="-0.5" aria-label="Diminuir consumo">−</button>
+          <input type="number" id="consumoInput" value="12" step="0.1" inputmode="decimal" aria-label="Consumo em quilômetros por litro">
+          <button type="button" data-t="consumo" data-s="0.5" aria-label="Aumentar consumo">+</button>
+        </div>
+      </section>
+      <section class="card">
+        <div class="field-top"><span class="field-name">Preço da gasolina</span><span class="field-unit">R$ por litro</span></div>
+        <div class="stepper">
+          <button type="button" data-t="gasolina" data-s="-0.1" aria-label="Diminuir preço">−</button>
+          <input type="number" id="gasolinaInput" value="5.80" step="0.01" inputmode="decimal" aria-label="Preço da gasolina por litro">
+          <button type="button" data-t="gasolina" data-s="0.1" aria-label="Aumentar preço">+</button>
+        </div>
+      </section>
+
+      <!-- METAS -->
+      <div class="sec-head"><h2>Meta e gastos fixos</h2></div>
+      <section class="card">
+        <label class="lbl" for="metaInput">Quanto você quer guardar por mês (R$)</label>
+        <input class="inp" type="number" id="metaInput" value="2500" inputmode="decimal">
+      </section>
+      <section class="card">
+        <div class="grid2">
+          <div>
+            <label class="lbl" for="lavaJatoInput">Lava-jato no mês (R$)</label>
+            <input class="inp" type="number" id="lavaJatoInput" value="60" inputmode="decimal">
+          </div>
+          <div>
+            <label class="lbl" for="gastosGeraisInput">Gastos gerais no mês (R$)</label>
+            <input class="inp" type="number" id="gastosGeraisInput" value="40" inputmode="decimal">
+          </div>
+        </div>
+      </section>
+
+      <button class="btn-wide-secondary" id="btnEditarVeiculo" type="button">Editar modelo e placa do veículo</button>
+    </div>
+  </div>
+
+  <footer>
+    Seus dados ficam na sua própria conta Google.<br>
+    <a href="privacidade.html">Política de Privacidade</a>
+  </footer>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   1. COLE AQUI O SEU CLIENT ID DO GOOGLE CLOUD CONSOLE
+   ═══════════════════════════════════════════════════════════ */
+const GOOGLE_CLIENT_ID = "COLE_SEU_CLIENT_ID_AQUI.apps.googleusercontent.com";
+
+const SCOPES = "https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/spreadsheets";
+const SHEET_NAME = "Calculadora Ganhos App Mobilidade — Meus Dados";
+
+let accessToken = null, spreadsheetId = null, tokenClient = null, userProfile = null;
+let tipoVeiculo = "alugado";
+let registros = [];
+
+const el = id => document.getElementById(id);
+const brl = n => (Number(n)||0).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const int = n => Math.round(Number(n)||0).toLocaleString('pt-BR');
+const hoje = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
+
+function sync(state, txt){
+  el('syncDot').className = 'dot' + (state==='busy'?' busy':state==='err'?' err':'');
+  el('syncText').textContent = txt;
+}
+
+/* ---------- LOGIN ---------- */
+window.onload = () => {
+  el('regData').value = hoje();
+
+  if(GOOGLE_CLIENT_ID.startsWith("COLE_SEU")){
+    el('gsiBtn').innerHTML = '<p style="color:var(--red);font-size:13px;margin:0">Client ID ainda não configurado neste arquivo.</p>';
+    return;
+  }
+
+  google.accounts.id.initialize({ client_id: GOOGLE_CLIENT_ID, callback: onCredential });
+  google.accounts.id.renderButton(el('gsiBtn'), { theme:'filled_black', size:'large', shape:'pill', text:'continue_with', locale:'pt-BR' });
+
+  tokenClient = google.accounts.oauth2.initTokenClient({
+    client_id: GOOGLE_CLIENT_ID,
+    scope: SCOPES,
+    callback: async r => {
+      if(r.error){ sync('err','Erro ao autorizar'); return; }
+      accessToken = r.access_token;
+      await afterLogin();
+    }
+  });
+};
+
+function onCredential(resp){
+  const p = JSON.parse(atob(resp.credential.split('.')[1]));
+  userProfile = p;
+  el('userName').textContent = p.name;
+  el('userEmail').textContent = p.email;
+  el('userPhoto').src = p.picture;
+  tokenClient.requestAccessToken({ prompt:'' });
+}
+
+el('btnLogout').addEventListener('click', () => {
+  if(accessToken) google.accounts.oauth2.revoke(accessToken, ()=>{});
+  location.reload();
+});
+
+async function afterLogin(){
+  el('loginScreen').classList.add('hidden');
+  el('appScreen').classList.remove('hidden');
+  sync('busy','Abrindo sua planilha…');
+  try{
+    spreadsheetId = await acharOuCriarPlanilha();
+    const d = await carregar();
+    if(!d.veiculo || !d.veiculo.modelo){
+      el('setupCard').classList.remove('hidden');
+    } else {
+      el('mainContent').classList.remove('hidden');
+      aplicarConfig(d.config);
+      renderHist(d.registros);
+      calcular();
+    }
+    sync('ok','Sincronizado');
+  }catch(e){
+    console.error(e);
+    sync('err','Falha ao conectar');
+  }
+}
+
+/* ---------- SHEETS / DRIVE ---------- */
+async function api(url, opt={}){
+  const r = await fetch(url,{...opt, headers:{...(opt.headers||{}), Authorization:`Bearer ${accessToken}`, 'Content-Type':'application/json'}});
+  if(!r.ok) throw new Error(`${r.status} ${await r.text()}`);
+  return r.json();
+}
+
+async function acharOuCriarPlanilha(){
+  const q = encodeURIComponent(`name='${SHEET_NAME}' and mimeType='application/vnd.google-apps.spreadsheet' and trashed=false`);
+  const found = await api(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)`);
+  if(found.files && found.files.length) return found.files[0].id;
+
+  const created = await api('https://sheets.googleapis.com/v4/spreadsheets',{
+    method:'POST',
+    body: JSON.stringify({
+      properties:{ title: SHEET_NAME },
+      sheets:[{properties:{title:'Perfil'}},{properties:{title:'Veiculo'}},{properties:{title:'Configuracoes'}},{properties:{title:'Registros'}}]
+    })
+  });
+  const id = created.spreadsheetId;
+  await escreverEm(id,'Perfil',[['nome','email'],[userProfile?.name||'',userProfile?.email||'']]);
+  await escreverEm(id,'Configuracoes',[CFG_COLS,[2500,5.80,12,200,30,60,40,'alugado',0]]);
+  await escreverEm(id,'Registros',[['data','valor']]);
+  return id;
+}
+
+const CFG_COLS = ['meta','gasolina','consumo','km','dias','lavaJato','gastosGerais','tipoVeiculo','custoVeiculo'];
+
+async function escreverEm(id,aba,vals){
+  await api(`https://sheets.googleapis.com/v4/spreadsheets/${id}/values/${encodeURIComponent(aba+'!A1')}?valueInputOption=RAW`,
+    {method:'PUT', body: JSON.stringify({values:vals})});
+}
+const escrever = (aba,vals) => escreverEm(spreadsheetId,aba,vals);
+
+async function ler(aba){
+  try{
+    const r = await api(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/${encodeURIComponent(aba+'!A1:Z2000')}`);
+    return r.values || [];
+  }catch(e){ return []; }
+}
+
+async function carregar(){
+  const [v,c,rg] = await Promise.all([ler('Veiculo'),ler('Configuracoes'),ler('Registros')]);
+  const veiculo = v.length>1 ? {modelo:v[1][0], placa:v[1][1]} : null;
+  const config = {meta:2500,gasolina:5.80,consumo:12,km:200,dias:30,lavaJato:60,gastosGerais:40,tipoVeiculo:'alugado',custoVeiculo:0};
+  if(c.length>1) c[0].forEach((k,i)=>{ config[k] = k==='tipoVeiculo' ? (c[1][i]||'alugado') : (parseFloat(c[1][i])||0); });
+  const registros = rg.slice(1).map(r=>({data:r[0],valor:parseFloat(r[1])||0})).filter(r=>r.data);
+  return {veiculo,config,registros};
+}
+
+async function salvarConfig(){
+  const s = estado();
+  await escrever('Configuracoes',[CFG_COLS,[s.meta,s.gasolina,s.consumo,s.km,s.dias,s.lavaJato,s.gastosGerais,s.tipoVeiculo,s.custoVeiculo]]);
+}
+
+/* ---------- ESTADO / CÁLCULO ---------- */
+function aplicarConfig(c){
+  el('kmInput').value=c.km; el('diasInput').value=c.dias;
+  el('consumoInput').value=c.consumo; el('gasolinaInput').value=c.gasolina;
+  el('metaInput').value=c.meta; el('lavaJatoInput').value=c.lavaJato; el('gastosGeraisInput').value=c.gastosGerais;
+  el('vehValor').value=c.custoVeiculo||0;
+  tipoVeiculo = c.tipoVeiculo || 'alugado';
+  const map = {proprio:'vehProprio',alugado:'vehAlugado',financiado:'vehFinanciado'};
+  const r = el(map[tipoVeiculo]); if(r) r.checked = true;
+  refletirVeiculo();
+}
+
+function estado(){
+  const proprio = tipoVeiculo === 'proprio';
+  return {
+    km:+el('kmInput').value||0, dias:+el('diasInput').value||1,
+    consumo:+el('consumoInput').value||1, gasolina:+el('gasolinaInput').value||0,
+    meta:+el('metaInput').value||0, lavaJato:+el('lavaJatoInput').value||0,
+    gastosGerais:+el('gastosGeraisInput').value||0,
+    tipoVeiculo, custoVeiculo: proprio ? 0 : (+el('vehValor').value||0)
+  };
+}
+
+function refletirVeiculo(){
+  const proprio = tipoVeiculo === 'proprio';
+  el('vehCost').classList.toggle('is-hidden', proprio);
+  el('vehNote').classList.toggle('is-hidden', !proprio);
+  el('vehValor').disabled = proprio;
+  el('vehValorLabel').textContent = tipoVeiculo === 'financiado'
+    ? 'Valor da parcela por mês (R$)'
+    : 'Valor do aluguel por mês (R$)';
+}
+
+function calcular(){
+  const s = estado();
+  const kmMes = s.km * s.dias;
+  const litros = s.consumo > 0 ? kmMes / s.consumo : 0;
+  const combustivel = litros * s.gasolina;
+  const outros = s.lavaJato + s.gastosGerais + s.custoVeiculo;
+  const necessario = combustivel + outros + s.meta;
+  const porDia = s.dias > 0 ? necessario / s.dias : 0;
+
+  el('metaDiaria').textContent = int(porDia);
+  el('diasLabel').textContent = `${int(s.dias)} dias no mês`;
+  el('stCombustivel').textContent = `R$ ${brl(combustivel)}`;
+  el('stOutros').textContent = `R$ ${brl(outros)}`;
+  el('stNecessario').textContent = `R$ ${brl(necessario)}`;
+  el('metaSub').textContent = `Rodando ${int(kmMes)} km no mês, ${int(litros)} litros de combustível.`;
+
+  const mes = hoje().slice(0,7);
+  const faturado = registros.filter(r=>r.data.slice(0,7)===mes).reduce((a,r)=>a+r.valor,0);
+  el('faturadoMes').textContent = `R$ ${brl(faturado)}`;
+  const pct = necessario>0 ? Math.min(100,(faturado/necessario)*100) : 0;
+  el('progFill').style.width = pct+'%';
+  el('progPct').textContent = Math.round(pct)+'%';
+
+  const sobra = faturado - combustivel - outros;
+  el('stSobra').textContent = `R$ ${brl(sobra)}`;
+  el('stSobra').className = sobra >= 0 ? 'pos' : 'neg';
+}
+
+function renderHist(lista){
+  registros = (lista||[]).slice().sort((a,b)=>b.data.localeCompare(a.data));
+  const box = el('histList');
+  if(!registros.length){
+    box.innerHTML = '<div class="empty">Nenhum registro ainda. Salve o faturamento de hoje para acompanhar sua meta.</div>';
+    return;
+  }
+  const s = estado();
+  const kmMes = s.km*s.dias;
+  const comb = s.consumo>0 ? (kmMes/s.consumo)*s.gasolina : 0;
+  const metaDia = s.dias>0 ? (comb + s.lavaJato + s.gastosGerais + s.custoVeiculo + s.meta)/s.dias : 0;
+
+  box.innerHTML = registros.slice(0,10).map(r=>{
+    const [y,m,d] = r.data.split('-');
+    const cls = r.valor >= metaDia ? 'up' : 'down';
+    return `<div class="hist-row"><span class="hist-date">${d}/${m}/${y}</span><span class="hist-val ${cls}">R$ ${brl(r.valor)}</span></div>`;
+  }).join('');
+}
+
+/* ---------- EVENTOS ---------- */
+document.querySelectorAll('input[name="tipoVeiculo"]').forEach(r=>{
+  r.addEventListener('change', ()=>{
+    tipoVeiculo = r.value;
+    refletirVeiculo();
+    calcular();
+    renderHist(registros);
+    agendarSalvar();
+  });
+});
+
+document.querySelectorAll('.stepper button').forEach(b=>{
+  b.addEventListener('click', ()=>{
+    const map={km:'kmInput',dias:'diasInput',consumo:'consumoInput',gasolina:'gasolinaInput'};
+    const inp = el(map[b.dataset.t]);
+    let v = (parseFloat(inp.value)||0) + parseFloat(b.dataset.s);
+    if(v<0) v=0;
+    inp.value = (b.dataset.t==='consumo'||b.dataset.t==='gasolina') ? v.toFixed(2) : Math.round(v);
+    calcular(); renderHist(registros); agendarSalvar();
+  });
+});
+
+['kmInput','diasInput','consumoInput','gasolinaInput','metaInput','lavaJatoInput','gastosGeraisInput','vehValor']
+  .forEach(id=> el(id).addEventListener('input', ()=>{ calcular(); renderHist(registros); agendarSalvar(); }));
+
+let tSave;
+function agendarSalvar(){
+  clearTimeout(tSave);
+  sync('busy','Salvando…');
+  tSave = setTimeout(async ()=>{
+    try{ await salvarConfig(); sync('ok','Sincronizado'); }
+    catch(e){ sync('err','Não salvou'); }
+  }, 700);
+}
+
+el('btnSalvarCadastro').addEventListener('click', async ()=>{
+  const modelo = el('setupModelo').value.trim();
+  const placa = el('setupPlaca').value.trim();
+  if(!modelo){ alert('Informe pelo menos o modelo do veículo.'); return; }
+  sync('busy','Salvando veículo…');
+  try{
+    await escrever('Veiculo',[['modelo','placa'],[modelo,placa]]);
+    el('setupCard').classList.add('hidden');
+    el('mainContent').classList.remove('hidden');
+    const d = await carregar();
+    aplicarConfig(d.config); renderHist(d.registros); calcular();
+    sync('ok','Sincronizado');
+  }catch(e){ sync('err','Não salvou'); }
+});
+
+el('btnEditarVeiculo').addEventListener('click', ()=>{
+  el('mainContent').classList.add('hidden');
+  el('setupCard').classList.remove('hidden');
+});
+
+el('btnVerPlanilha').addEventListener('click', ()=>{
+  if(spreadsheetId) window.open(`https://docs.google.com/spreadsheets/d/${spreadsheetId}/edit`,'_blank');
+});
+
+el('btnRegistrar').addEventListener('click', async ()=>{
+  const data = el('regData').value;
+  const valor = parseFloat(el('regValor').value);
+  if(!data || !valor){ alert('Preencha a data e o valor faturado.'); return; }
+  sync('busy','Salvando registro…');
+  try{
+    await api(`https://sheets.googleapis.com/v4/spreadsheets/${spreadsheetId}/values/Registros!A:B:append?valueInputOption=RAW`,
+      {method:'POST', body: JSON.stringify({values:[[data,valor]]})});
+    registros.push({data,valor});
+    renderHist(registros); calcular();
+    el('regValor').value='';
+    sync('ok','Sincronizado');
+  }catch(e){ sync('err','Não salvou'); }
+});
+</script>
+</body>
+</html>
